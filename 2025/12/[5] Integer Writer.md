@@ -57,7 +57,7 @@ if (pos >= 100) {
 というエスケープが行われています。しかし、このエスケープではposに負数が与えられた場合の処理が行えていません。今回はそこを突きます。
 ※ここでは、スタック等に関する詳しい解説は行いませんが、moraさんのwriteupで解説されているので、ご参照ください。(https://moraprogramming.hateblo.jp/entry/2025/12/06/041519)
 
-早速、BOFに必要なアドレスを調べに行きます。まず、main.cにもコメントアウトで書かれているように、win関数のアドレスを調べます。
+早速、配列の範囲外書き込みに必要なアドレスを調べていきます。まず、main.cにもコメントアウトで書かれているように、win関数のアドレスを調べます。
 ```
 └─$ checksec chal                            
 [*] '/home/kali/Desktop/DailyAlpacaHack/integer-writer/chal'
@@ -143,7 +143,7 @@ Dump of assembler code for function main:
    0x00000000004012e4 <+239>:   ret
 End of assembler dump.
 ```
-この結果から、scanf(の処理の大きなまとまりは)
+この結果から、scanf(の準備としょりのまとまり)は、
 ```
    0x00000000004012a2 <+173>:   mov    eax,DWORD PTR [rbp-0x1a4]
    0x00000000004012a8 <+179>:   lea    rdx,[rbp-0x1a0]
@@ -235,7 +235,7 @@ pwndbg> x/20wx $rsp
 0x7fffffffdb48: 0xf7fc7000      0x00007fff      0x00000000      0x00000000
 pwndbg> 
 ```
-0x7fffffffdb08に、0x004012caという戻りアドレスが入っています。これは、先ほどのmain逆アセンブル結果からも見てわかるように、scanfの後に0x4012caが呼び出されていることから正しいアドレスであることを確認できます。つまり、integers[0]から、
+0x7fffffffdb08に、0x004012caという戻りアドレスが入っています。これは、先ほどのmain逆アセンブル結果からも見てわかるように、scanfの後に0x4012caがあることから正しいアドレスであることを確認できます。つまり、integers[0]から、
 ```
 └─$ python3 -c "print(0x7fffffffdb08-0x7fffffffdb20)"
 -24
