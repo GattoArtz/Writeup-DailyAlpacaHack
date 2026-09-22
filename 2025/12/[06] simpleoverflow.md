@@ -1,4 +1,4 @@
-# a fact of CTF ( 2025/12/2 )
+# simpleoverflow ( 2025/12/6 )
 ## Description
 Cでは、0がFalse、それ以外がTrueとして扱われます。
 ## Solve
